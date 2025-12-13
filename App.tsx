@@ -3,64 +3,8 @@ import { Menu, X } from 'lucide-react';
 import { BRAND, DATA } from './constants';
 import { MasonryLayout } from './components/MasonryLayout';
 import { DetailPage } from './components/DetailPage';
+import { AboutPage } from './components/AboutPage';
 import { ContentItem, ContentType } from './types';
-
-// About Modal Component
-const AboutModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  if (!isOpen) return null;
-  
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-ink/20 backdrop-blur-sm animate-in fade-in duration-300" 
-        onClick={onClose} 
-      />
-      
-      {/* Modal Content */}
-      <div className="relative bg-paper w-full max-w-lg border-[0.5px] border-line p-8 md:p-12 animate-in fade-in zoom-in-95 duration-300 shadow-none">
-        <button 
-          onClick={onClose} 
-          className="absolute top-6 right-6 text-ink/40 hover:text-ink transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-        
-        <div className="space-y-8">
-          <div>
-             <span className="font-mono text-xs text-brick tracking-widest uppercase mb-2 block">Brand Identity</span>
-             <h2 className="font-serif text-3xl text-ink mb-1">FORM & VOID</h2>
-             <p className="font-sans text-sm text-ink/60">Architecting the Quiet Context</p>
-          </div>
-          
-          <div className="w-12 h-[0.5px] bg-ink/20" />
-          
-          <div className="space-y-4 font-sans font-light text-ink/80 leading-relaxed text-sm">
-            <p>
-              우리는 사람의 자연스러운 행동(Void/Context)을 지키기 위해, 
-              가장 논리적인 시스템(Form/System)을 만드는 '라이프 아키텍트' 그룹입니다.
-            </p>
-            <p>
-              새벽 2시의 작업실, 오래된 도서관 아카이브, 
-              그리고 빗소리만 들리는 다다미 방에서 영감을 받습니다.
-            </p>
-          </div>
-
-          <div className="pt-4 border-t-[0.5px] border-line grid grid-cols-2 gap-4">
-             <div>
-               <h4 className="font-mono text-[10px] text-ink/40 uppercase mb-1">Atmosphere</h4>
-               <p className="font-sans text-xs">Serene, Static, Logical</p>
-             </div>
-             <div>
-               <h4 className="font-mono text-[10px] text-ink/40 uppercase mb-1">Contact</h4>
-               <p className="font-sans text-xs underline decoration-[0.5px] underline-offset-2">studio@formvoid.com</p>
-             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Header Props Definition
 interface HeaderProps {
@@ -207,9 +151,9 @@ const Footer = () => {
 
 // Main App Component
 const App: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'HOME' | 'ABOUT' | 'DETAIL'>('HOME');
   const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
   
   // Ref for smooth scrolling to the grid section
   const archiveRef = useRef<HTMLDivElement>(null);
@@ -222,11 +166,12 @@ const App: React.FC = () => {
   // Handlers
   const handleItemClick = (item: ContentItem) => {
     setSelectedItem(item);
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    setCurrentView('DETAIL');
   };
 
-  const handleBack = () => {
+  const handleBackToHome = () => {
     setSelectedItem(null);
+    setCurrentView('HOME');
   };
 
   const scrollToArchive = () => {
@@ -236,70 +181,87 @@ const App: React.FC = () => {
   const handleLogoClick = () => {
     setSelectedItem(null);
     setActiveFilter('ALL');
+    setCurrentView('HOME');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleNavClick = (filter: string) => {
     setSelectedItem(null);
     setActiveFilter(filter);
-    // Add a small delay to allow render if switching from DetailPage, then scroll
+    setCurrentView('HOME');
+    // Add a small delay to allow render if switching from Detail/About Page, then scroll
     setTimeout(() => scrollToArchive(), 100);
+  };
+  
+  const handleAboutClick = () => {
+    setSelectedItem(null);
+    setCurrentView('ABOUT');
+  };
+
+  // Render Logic based on View State
+  const renderContent = () => {
+    if (currentView === 'DETAIL' && selectedItem) {
+      return <DetailPage item={selectedItem} onBack={handleBackToHome} />;
+    }
+    
+    if (currentView === 'ABOUT') {
+      return <AboutPage onBack={handleBackToHome} />;
+    }
+
+    // Default: HOME view
+    return (
+      <>
+        <Hero onScrollDown={scrollToArchive} />
+        
+        {/* Filter Bar */}
+        <div 
+          ref={archiveRef} 
+          className="sticky top-16 z-30 bg-paper/95 backdrop-blur w-full py-4 px-6 border-b-[0.5px] border-line flex justify-end items-center gap-6 overflow-x-auto scrollbar-hide"
+        >
+          {['ALL', 'BLUEPRINT', 'ESSAY', 'PROJECT', 'INSPIRATION'].map((filter) => (
+            <button 
+              key={filter} 
+              onClick={() => setActiveFilter(filter)}
+              className={`
+                font-mono text-xs tracking-wider transition-all duration-300
+                ${activeFilter === filter 
+                  ? 'text-ink underline decoration-[0.5px] underline-offset-4 font-bold' 
+                  : 'text-ink/40 hover:text-brick'}
+              `}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+
+        {/* Empty State or Grid */}
+        {filteredData.length > 0 ? (
+          <MasonryLayout items={filteredData} onItemClick={handleItemClick} />
+        ) : (
+          <div className="w-full h-64 flex flex-col items-center justify-center border-t-[0.5px] border-line text-ink/40 font-mono text-xs">
+            <span>NO DATA FOUND IN THIS CONTEXT.</span>
+            <button 
+              onClick={() => setActiveFilter('ALL')} 
+              className="mt-4 text-brick hover:underline underline-offset-4"
+            >
+              RESET FILTER
+            </button>
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
     <div className="min-h-screen bg-paper flex flex-col font-sans selection:bg-brick/20 selection:text-ink">
-      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-      
       <Header 
         onLogoClick={handleLogoClick} 
         onNavClick={handleNavClick} 
-        onAboutClick={() => setIsAboutOpen(true)}
+        onAboutClick={handleAboutClick}
       />
       
       <main className="flex-grow w-full max-w-[1920px] mx-auto border-x-[0.5px] border-line box-content">
-        {selectedItem ? (
-          <DetailPage item={selectedItem} onBack={handleBack} />
-        ) : (
-          <>
-            <Hero onScrollDown={scrollToArchive} />
-            
-            {/* Filter Bar */}
-            <div 
-              ref={archiveRef} 
-              className="sticky top-16 z-30 bg-paper/95 backdrop-blur w-full py-4 px-6 border-b-[0.5px] border-line flex justify-end items-center gap-6 overflow-x-auto scrollbar-hide"
-            >
-              {['ALL', 'BLUEPRINT', 'ESSAY', 'PROJECT', 'INSPIRATION'].map((filter) => (
-                <button 
-                  key={filter} 
-                  onClick={() => setActiveFilter(filter)}
-                  className={`
-                    font-mono text-xs tracking-wider transition-all duration-300
-                    ${activeFilter === filter 
-                      ? 'text-ink underline decoration-[0.5px] underline-offset-4 font-bold' 
-                      : 'text-ink/40 hover:text-brick'}
-                  `}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-
-            {/* Empty State or Grid */}
-            {filteredData.length > 0 ? (
-              <MasonryLayout items={filteredData} onItemClick={handleItemClick} />
-            ) : (
-              <div className="w-full h-64 flex flex-col items-center justify-center border-t-[0.5px] border-line text-ink/40 font-mono text-xs">
-                <span>NO DATA FOUND IN THIS CONTEXT.</span>
-                <button 
-                  onClick={() => setActiveFilter('ALL')} 
-                  className="mt-4 text-brick hover:underline underline-offset-4"
-                >
-                  RESET FILTER
-                </button>
-              </div>
-            )}
-          </>
-        )}
+        {renderContent()}
       </main>
       
       <Footer />
