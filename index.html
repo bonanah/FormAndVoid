@@ -29,9 +29,6 @@
             borderWidth: {
               'hairline': '0.5px',
             },
-            cursor: {
-              'crosshair': 'crosshair',
-            },
             transitionDuration: {
               '300': '300ms',
             }
@@ -40,11 +37,28 @@
       }
     </script>
     <style>
+      /* Hide default cursor to use custom fluid cursor */
       body {
-        cursor: crosshair;
+        cursor: none;
         background-color: #F4F4F1;
         color: #2A2A2A;
       }
+      
+      /* Revert to default cursor on touch devices */
+      @media (pointer: coarse) {
+        body {
+          cursor: auto;
+        }
+        .custom-cursor {
+          display: none !important;
+        }
+      }
+      
+      /* Ensure links and buttons also hide cursor */
+      a, button, [role="button"], input, select, textarea {
+        cursor: none;
+      }
+
       /* Custom scrollbar to match the minimal aesthetic */
       ::-webkit-scrollbar {
         width: 6px;
@@ -68,10 +82,12 @@
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
+    "react": "https://esm.sh/react@18.3.1",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/": "https://esm.sh/react-dom@18.3.1/",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
+    "framer-motion": "https://esm.sh/framer-motion@10.16.4?external=react,react-dom"
   }
 }
 </script>

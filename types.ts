@@ -13,6 +13,8 @@ export interface ContentItem {
   date: string;
   imageUrl: string;
   aspectRatio?: string; // 'square' | 'portrait' | 'landscape'
+  isLocked?: boolean; // For NDA protected items
+  keywords?: string[]; // For contextual search
 }
 
 export interface NavItem {
