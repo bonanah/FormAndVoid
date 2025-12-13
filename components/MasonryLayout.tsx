@@ -4,6 +4,7 @@ import { GridItem } from './GridItem';
 
 interface MasonryLayoutProps {
   items: ContentItem[];
+  onItemClick?: (item: ContentItem) => void;
 }
 
 // Enhanced Void Cell with Text Support
@@ -51,7 +52,7 @@ type GridElement =
   | { type: 'ITEM'; data: ContentItem }
   | { type: 'VOID'; id: string; spanClass: string; text?: string; subText?: string; align?: 'center' | 'bottom-left' };
 
-export const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
+export const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items, onItemClick }) => {
   
   const mixedElements: GridElement[] = [];
   
@@ -143,7 +144,10 @@ export const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
                 min-h-[300px]
               `}
             >
-              <GridItem item={item} />
+              <GridItem 
+                item={item} 
+                onClick={() => onItemClick && onItemClick(item)}
+              />
             </div>
           );
         })}

@@ -4,11 +4,15 @@ import { ArrowUpRight } from 'lucide-react';
 
 interface GridItemProps {
   item: ContentItem;
+  onClick?: () => void;
 }
 
-export const GridItem: React.FC<GridItemProps> = ({ item }) => {
+export const GridItem: React.FC<GridItemProps> = ({ item, onClick }) => {
   return (
-    <div className="group relative w-full h-full bg-paper overflow-hidden flex flex-col">
+    <div 
+      onClick={onClick}
+      className="group relative w-full h-full bg-paper overflow-hidden flex flex-col cursor-pointer"
+    >
       {/* Container for content - making it full height to stretch in grid */}
       <div className="flex flex-col h-full w-full">
         
